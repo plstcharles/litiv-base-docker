@@ -33,12 +33,14 @@ RUN apt-get update && apt-get install -y \
     python \
     python-dev \
     python-numpy \
+    ffmpeg \
     libtbb2 \
     libtbb-dev \
     libjpeg-dev \
     libpng-dev \
     libtiff-dev \
     libjasper-dev \
+    libx264-dev \
     zlib1g-dev \
     libdc1394-22-dev \
     libeigen3-dev \
@@ -58,7 +60,11 @@ RUN cmake \
     -D CMAKE_BUILD_TYPE=RELEASE \
     -D CMAKE_INSTALL_PREFIX=/usr/local \
     -D OPENCV_EXTRA_MODULES_PATH=/opencv_contrib/modules \
-    .. && make -j${nbthreads} install && make clean
+    -D BUILD_DOCS=OFF \
+    -D BUILD_TESTS=OFF \
+    -D BUILD_PERF_TESTS=OFF \
+    -D WITH_OPENMP=ON \
+    .. && make -j${nbthreads} install && rm -r /opencv/build
 
 RUN git clone -b master --progress --verbose --single-branch https://github.com/plstcharles/opengm.git /opengm
 WORKDIR /opengm/build
@@ -75,7 +81,8 @@ RUN cmake \
     -D WITH_QPBO=ON \
     -D WITH_TRWS=ON \
     .. \
- && make externalLibs && cmake .. && make -j${nbthreads} install && make clean
+ && make externalLibs && cmake .. && make -j${nbthreads} install && rm -r /opengm/build
 
 RUN ldconfig
+WORKDIR /
 CMD ["/bin/bash"]
