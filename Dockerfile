@@ -24,24 +24,27 @@ ENV nbthreads=4
 
 RUN apt-get update && apt-get install -y \
     build-essential \
+    autoconf \
+    automake \
     cmake \
+    yasm \
     git \
-    libgtk2.0-dev \
     pkg-config \
+    texinfo \
     wget \
     curl \
+    unzip \
     python \
     python-dev \
     python-numpy \
-    ffmpeg \
     libtbb2 \
+    libtool \
     libtbb-dev \
     libjpeg-dev \
     libpng-dev \
     libtiff-dev \
-    libjasper-dev \
     libx264-dev \
-    zlib1g-dev \
+    libjasper-dev \
     libdc1394-22-dev \
     libeigen3-dev \
     libgl1-mesa-glx \
@@ -51,37 +54,69 @@ RUN apt-get update && apt-get install -y \
     libglm-dev \
     freeglut3-dev \
     libglew-dev \
-    unzip \
+    libgtk2.0-dev \
+    zlib1g-dev \
  && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /
+RUN wget http://download.videolan.org/pub/x264/snapshots/last_x264.tar.bz2 && \
+    tar xjvf last_x264.tar.bz2 && rm last_x264.tar.bz2 && mv x264-snapshot* x264 && cd x264 && \
+    ./configure \
+        --enable-static \
+        --enable-pic \
+    make -j${nbthreads} && make install && make distclean
+
+WORKDIR /
+RUN wget http://ffmpeg.org/releases/ffmpeg-snapshot.tar.bz2 && \
+    tar xjvf ffmpeg-snapshot.tar.bz2 && rm ffmpeg-snapshot.tar.bz2 && cd ffmpeg && \
+    ./configure \
+        --pkg-config-flags="--static" \
+        --enable-shared \
+        --disable-static \
+        --enable-gpl \
+        --enable-nonfree \
+        --enable-libx264 \
+        --enable-pic \
+        --enable-version3 \
+        --enable-runtime-cpudetect && \
+    make -j${nbthreads} && make install && make distclean
 
 RUN git clone -b ${opencvtag} --progress --verbose --single-branch https://github.com/opencv/opencv.git /opencv && git clone -b ${opencvtag} --progress --verbose --single-branch https://github.com/opencv/opencv_contrib.git /opencv_contrib
 WORKDIR /opencv/build
-RUN cmake \
-    -D CMAKE_BUILD_TYPE=RELEASE \
-    -D CMAKE_INSTALL_PREFIX=/usr/local \
-    -D OPENCV_EXTRA_MODULES_PATH=/opencv_contrib/modules \
-    -D BUILD_DOCS=OFF \
-    -D BUILD_TESTS=OFF \
-    -D BUILD_PERF_TESTS=OFF \
-    -D WITH_OPENMP=ON \
-    .. && make -j${nbthreads} install && rm -r /opencv/build
+RUN sed -i -e 's/libavformat\.a/libavformat.so/g' \
+        -e 's/libavutil\.a/libavutil.so/g' \
+        -e 's/libswscale\.a/libswscale.so/g' \
+        -e 's/libavresample\.a/libavresample.so/g' \
+        -e 's/libavcodec\.a/libavcodec.so/g' \
+        ../cmake/OpenCVFindLibsVideo.cmake && \
+    cmake \
+        -D CMAKE_BUILD_TYPE=RELEASE \
+        -D CMAKE_INSTALL_PREFIX=/usr/local \
+        -D OPENCV_EXTRA_MODULES_PATH=/opencv_contrib/modules \
+        -D BUILD_DOCS=OFF \
+        -D BUILD_TESTS=OFF \
+        -D BUILD_PERF_TESTS=OFF \
+        -D WITH_OPENMP=ON \
+        -D WITH_FFMPEG=ON \
+        .. && \
+    make -j${nbthreads} install && rm -r /opencv/build
 
 RUN git clone -b master --progress --verbose --single-branch https://github.com/plstcharles/opengm.git /opengm
 WORKDIR /opengm/build
 RUN cmake \
-    -D CMAKE_BUILD_TYPE=RELEASE \
-    -D CMAKE_INSTALL_PREFIX=/usr/local \
-    -D BUILD_EXAMPLES=OFF \
-    -D BUILD_TESTING=OFF \
-    -D BUILD_TUTORIALS=OFF \
-    -D INSTALL_EXTERNAL_LIB=ON \
-    -D WITH_GCO=ON \
-    -D WITH_MAXFLOW=ON \
-    -D WITH_OPENMP=ON \
-    -D WITH_QPBO=ON \
-    -D WITH_TRWS=ON \
-    .. \
- && make externalLibs && cmake .. && make -j${nbthreads} install && rm -r /opengm/build
+        -D CMAKE_BUILD_TYPE=RELEASE \
+        -D CMAKE_INSTALL_PREFIX=/usr/local \
+        -D BUILD_EXAMPLES=OFF \
+        -D BUILD_TESTING=OFF \
+        -D BUILD_TUTORIALS=OFF \
+        -D INSTALL_EXTERNAL_LIB=ON \
+        -D WITH_GCO=ON \
+        -D WITH_MAXFLOW=ON \
+        -D WITH_OPENMP=ON \
+        -D WITH_QPBO=ON \
+        -D WITH_TRWS=ON \
+        .. && \
+    make externalLibs && cmake .. && make -j${nbthreads} install && rm -r /opengm/build
 
 RUN ldconfig
 WORKDIR /
