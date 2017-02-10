@@ -45,16 +45,7 @@ RUN apt-get update && apt-get install -y \
     libtiff-dev \
     libx264-dev \
     libjasper-dev \
-    libdc1394-22-dev \
     libeigen3-dev \
-    libgl1-mesa-glx \
-    libgl1-mesa-dev \
-    libglu1-mesa \
-    libglu1-mesa-dev \
-    libglm-dev \
-    freeglut3-dev \
-    libglew-dev \
-    libgtk2.0-dev \
     zlib1g-dev \
  && rm -rf /var/lib/apt/lists/*
 
