@@ -7,4 +7,10 @@ LITIV Docker Base Image Builder
 
 This repository serves to build a docker image for all LITIV framework dependencies.
 
+Contents:
+* libx264 (latest snapshot, statically compiled with pic)
+* ffmpeg (latest snapshot, gpl/nonfree w/ x264 support)
+* OpenCV (v3.1.0 snapshot by default, w/ ffmpeg support)
+* OpenGM (latest fork snapshot, w/ external libs support)
+
 See the original repo at https://github.com/plstcharles/litiv for more information.
