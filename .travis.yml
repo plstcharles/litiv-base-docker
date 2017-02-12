@@ -23,6 +23,6 @@ before_install:
   - docker login --username=$DOCKER_HUB_USERNAME --password=$DOCKER_HUB_PASSWORD
   - echo "ENV GIT_SHA ${TRAVIS_COMMIT}" >> Dockerfile
 script:
-  - docker build -t ${DOCKER_HUB_REPO}:${TRAVIS_COMMIT} -t ${DOCKER_HUB_REPO}:latest .
+  - docker build -t ${DOCKER_HUB_REPO}:${TRAVIS_COMMIT} -t ${DOCKER_HUB_REPO}:centos7-latest .
 after_success:
   - docker push ${DOCKER_HUB_REPO}

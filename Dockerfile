@@ -15,59 +15,59 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM ubuntu:16.04
+FROM centos:7
 MAINTAINER Pierre-Luc St-Charles <pierre-luc.st-charles@polymtl.ca>
-LABEL Description="Contains all LITIV framework dependencies"
+LABEL Description="Contains all LITIV framework dependencies (C++11 compat build)"
 
 ENV opencvtag=3.1.0
 ENV nbthreads=4
 
-RUN apt-get update && apt-get install -y \
-    build-essential \
+RUN yum update -y && yum install -y \
+    gcc \
+    gcc-c++ \
+    make \
+    gettext \
+    patch \
+    patchutils \
     autoconf \
     automake \
+    bzip2 \
     cmake \
-    yasm \
     git \
-    pkg-config \
+    pkgconfig \
+    zlib-devel \
     texinfo \
     wget \
     curl \
     unzip \
     python \
-    python-dev \
-    python-numpy \
-    libtbb2 \
+    tbb \
+    tbb-devel \
     libtool \
-    libtbb-dev \
-    libjpeg-dev \
-    libpng-dev \
-    libtiff-dev \
-    libx264-dev \
-    libjasper-dev \
-    libeigen3-dev \
-    zlib1g-dev \
- && rm -rf /var/lib/apt/lists/*
+    libjpeg \
+    libpng \
+    eigen3 \
+    && yum clean all
+
+WORKDIR /
+RUN git clone --depth 1 git://github.com/yasm/yasm.git && \
+    cd /yasm && autoreconf -fiv && ./configure && make install && make distclean
 
 WORKDIR /
 RUN wget http://download.videolan.org/pub/x264/snapshots/last_x264.tar.bz2 && \
     tar xjvf last_x264.tar.bz2 && rm last_x264.tar.bz2 && mv x264-snapshot* x264 && cd x264 && \
-    ./configure \
-        --enable-static \
-        --enable-pic \
+    ./configure --enable-shared && \
     make -j${nbthreads} && make install && make distclean
 
 WORKDIR /
 RUN wget http://ffmpeg.org/releases/ffmpeg-snapshot.tar.bz2 && \
     tar xjvf ffmpeg-snapshot.tar.bz2 && rm ffmpeg-snapshot.tar.bz2 && cd ffmpeg && \
     ./configure \
-        --pkg-config-flags="--static" \
         --enable-shared \
         --disable-static \
         --enable-gpl \
         --enable-nonfree \
         --enable-libx264 \
-        --enable-pic \
         --enable-version3 \
         --enable-runtime-cpudetect && \
     make -j${nbthreads} && make install && make distclean
