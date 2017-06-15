@@ -19,7 +19,7 @@ FROM ubuntu:16.04
 MAINTAINER Pierre-Luc St-Charles <pierre-luc.st-charles@polymtl.ca>
 LABEL Description="Contains all LITIV framework dependencies"
 
-ENV opencvtag=3.1.0
+ENV opencvtag=3.2.0
 ENV nbthreads=4
 
 RUN apt-get update && apt-get install -y \
@@ -50,16 +50,23 @@ RUN apt-get update && apt-get install -y \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /
-RUN wget http://download.videolan.org/pub/x264/snapshots/last_x264.tar.bz2 && \
-    tar xjvf last_x264.tar.bz2 && rm last_x264.tar.bz2 && mv x264-snapshot* x264 && cd x264 && \
+RUN wget http://www.nasm.us/pub/nasm/releasebuilds/2.13.01/nasm-2.13.01.tar.xz && \
+    tar xvf nasm-2.13.01.tar.xz && rm nasm-2.13.01.tar.xz && cd nasm-2.13.01 && \
     ./configure \
-        --enable-static \
-        --enable-pic \
+        --prefix=/usr && \
     make -j${nbthreads} && make install && make distclean
 
 WORKDIR /
-RUN wget http://ffmpeg.org/releases/ffmpeg-snapshot.tar.bz2 && \
-    tar xjvf ffmpeg-snapshot.tar.bz2 && rm ffmpeg-snapshot.tar.bz2 && cd ffmpeg && \
+RUN wget http://download.videolan.org/pub/x264/snapshots/x264-snapshot-20170614-2245-stable.tar.bz2 && \
+    tar xjvf x264-snapshot-20170614-2245-stable.tar.bz2 && rm x264-snapshot-20170614-2245-stable.tar.bz2 && cd x264-snapshot-20170614-2245-stable && \
+    ./configure \
+        --enable-static \
+        --enable-pic && \
+    make -j${nbthreads} && make install && make distclean
+
+WORKDIR /
+RUN wget http://ffmpeg.org/releases/ffmpeg-3.3.tar.bz2 && \
+    tar xjvf ffmpeg-3.3.tar.bz2 && rm ffmpeg-3.3.tar.bz2 && cd ffmpeg-3.3 && \
     ./configure \
         --pkg-config-flags="--static" \
         --enable-shared \
