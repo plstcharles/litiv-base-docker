@@ -113,6 +113,8 @@ RUN cmake \
         -D WITH_OPENMP=ON \
         -D WITH_QPBO=ON \
         -D WITH_TRWS=ON \
+        -D WITH_FASTPD=ON \
+        -D FASTPD_URL="https://drive.google.com/uc?export=download&id=0B55Ba7lWTLh4LW1DcHEta0x3U3c" \
         .. && \
     make externalLibs && cmake .. && make -j${nbthreads} install && rm -r /opengm/build
 
