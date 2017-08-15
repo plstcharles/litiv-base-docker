@@ -29,6 +29,7 @@ RUN apt-get update && apt-get install -y \
     cmake \
     yasm \
     git \
+    dos2unix \
     pkg-config \
     texinfo \
     wget \
